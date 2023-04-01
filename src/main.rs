@@ -11,18 +11,26 @@ mod prelude {
     pub use crate::player::player::*;
     pub use bevy::prelude::*;
     pub use bevy_rapier2d::prelude::*;
+
+    #[derive(Debug, Clone, Copy, Default, Eq, PartialEq, Hash, States)]
+    pub enum AppState {
+        Menu,
+        #[default]
+        InGame,
+    }
 }
 
 use prelude::*;
 
 fn main() {
     App::new()
+        .add_state::<AppState>()
         .add_plugins(DefaultPlugins)
         .add_plugin(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(40.0))
         .add_plugin(RapierDebugRenderPlugin::default())
         .add_plugin(PlatformsPlugin)
         .add_plugin(PlayerPlugin)
-        .add_startup_system(setup)
+        .add_system(setup.on_startup())
         .run();
 }
 

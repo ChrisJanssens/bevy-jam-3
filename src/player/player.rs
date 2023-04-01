@@ -4,7 +4,7 @@ pub struct PlayerPlugin;
 
 impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
-        app.add_startup_system(spawn_player);
+        app.add_system(spawn_player.in_schedule(OnEnter(AppState::InGame)));
     }
 }
 
