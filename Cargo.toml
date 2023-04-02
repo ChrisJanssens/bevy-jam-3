@@ -7,4 +7,4 @@ rust-version = "1.67.0"
 
 [dependencies]
 bevy = "0.10"
-bevy_rapier2d = "0.21"
+bevy_rapier2d = {git="https://github.com/ChrisJanssens/bevy_rapier.git"}

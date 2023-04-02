@@ -3,14 +3,14 @@
 // workflow treats them as errors, so this allows them throughout the project.
 // Feel free to delete this line.
 #![allow(clippy::too_many_arguments, clippy::type_complexity)]
+mod control;
 mod environment;
-mod player;
 mod systems;
 mod tools;
 
 mod prelude {
+    pub use crate::control::player::*;
     pub use crate::environment::platforms::*;
-    pub use crate::player::player::*;
     pub use crate::systems::collectibles::*;
     pub use crate::tools::asset_tracker::*;
     pub use bevy::prelude::*;

@@ -32,6 +32,7 @@ fn spawn_player(mut cmd: Commands) {
             ..default()
         },
         Velocity::zero(),
+        GravityScale::default(),
         Player,
         LockedAxes::ROTATION_LOCKED,
     ));
@@ -45,11 +46,7 @@ fn move_player(
     let (mut velocity, mut player) = controllers.single_mut();
     let mut movement = Vec2::new(0.0, 0.0);
 
-    let ground_touched = if outputs.iter().count() < 1 {
-        false
-    } else {
-        outputs.iter().map(|p| p.grounded).any(|t| t)
-    };
+    let ground_touched = outputs.iter().map(|p| p.grounded).any(|t| t);
     movement += if keyboard_input.pressed(KeyCode::A) {
         Vec2::new(-1.0, 0.0)
     } else {
