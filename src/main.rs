@@ -5,10 +5,14 @@
 #![allow(clippy::too_many_arguments, clippy::type_complexity)]
 mod environment;
 mod player;
+mod systems;
+mod tools;
 
 mod prelude {
     pub use crate::environment::platforms::*;
     pub use crate::player::player::*;
+    pub use crate::systems::collectibles::*;
+    pub use crate::tools::asset_tracker::*;
     pub use bevy::prelude::*;
     pub use bevy_rapier2d::prelude::*;
 
@@ -30,6 +34,7 @@ fn main() {
         .add_plugin(RapierDebugRenderPlugin::default())
         .add_plugin(PlatformsPlugin)
         .add_plugin(PlayerPlugin)
+        .add_plugin(CollectiblesPlugin)
         .add_system(setup.on_startup())
         .run();
 }
