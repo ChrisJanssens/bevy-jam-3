@@ -43,7 +43,21 @@ fn add_collectibles(mut cmd: Commands, tracker: Res<AssetTracker<Potions, Image>
     if let Some(blue_handle) = tracker.get_handle(Potions::Blue) {
         cmd.spawn(SpriteBundle {
             texture: blue_handle,
-            transform: Transform::from_translation(Vec3::new(-50.0, 0.0, 0.0)),
+            transform: Transform::from_translation(Vec3::new(-100.0, -250.0, 0.0)),
+            ..Default::default()
+        });
+    }
+    if let Some(green_handle) = tracker.get_handle(Potions::Green) {
+        cmd.spawn(SpriteBundle {
+            texture: green_handle,
+            transform: Transform::from_translation(Vec3::new(100.0, -250.0, 0.0)),
+            ..Default::default()
+        });
+    }
+    if let Some(red_handle) = tracker.get_handle(Potions::Red) {
+        cmd.spawn(SpriteBundle {
+            texture: red_handle,
+            transform: Transform::from_translation(Vec3::new(320.0, -250.0, 0.0)),
             ..Default::default()
         });
     }

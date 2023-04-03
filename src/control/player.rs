@@ -32,7 +32,7 @@ fn spawn_player(mut cmd: Commands) {
             ..default()
         },
         Velocity::zero(),
-        GravityScale::default(),
+        GravityScale(10.0),
         Player,
         LockedAxes::ROTATION_LOCKED,
     ));
@@ -58,7 +58,7 @@ fn move_player(
         Vec2::new(0.0, 0.0)
     };
     if keyboard_input.just_pressed(KeyCode::W) && ground_touched {
-        velocity.linvel = Vec2::new(0.0, 100.0);
+        velocity.linvel = Vec2::new(0.0, 400.0);
     }
     player.translation = Some(movement);
 }
