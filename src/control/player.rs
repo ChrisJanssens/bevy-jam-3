@@ -32,7 +32,7 @@ fn spawn_player(mut cmd: Commands) {
             ..default()
         },
         Velocity::zero(),
-        GravityScale(10.0),
+        GravityScale(8.0),
         Player,
         LockedAxes::ROTATION_LOCKED,
     ));
