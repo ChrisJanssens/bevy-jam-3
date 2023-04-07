@@ -14,6 +14,7 @@ mod prelude {
     pub use crate::systems::collectibles::*;
     pub use crate::tools::asset_tracker::*;
     pub use bevy::prelude::*;
+    pub use bevy::utils::*;
     pub use bevy_rapier2d::prelude::*;
 
     #[derive(Debug, Clone, Copy, Default, Eq, PartialEq, Hash, States)]

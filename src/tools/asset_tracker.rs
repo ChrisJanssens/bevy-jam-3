@@ -18,7 +18,7 @@ impl<T: Eq, H: Asset> AssetTracker<T, H> {
     pub fn get_handle(&self, target: T) -> Option<Handle<H>> {
         for r in self.assets.iter() {
             if r.asset == target {
-                return Some(r.handle.clone());
+                return Some(r.handle.clone_weak());
             }
         }
         None
