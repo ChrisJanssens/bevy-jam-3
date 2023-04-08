@@ -6,11 +6,21 @@ pub struct PlayerPlugin;
 #[derive(Component)]
 pub struct Player;
 
+#[derive(Debug, Clone, Copy, Default, Eq, PartialEq, Hash, States)]
+pub enum PlayerState {
+    #[default]
+    Idle,
+    Walking,
+    Jumping,
+}
+
 impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
-        app.add_system(spawn_player.in_schedule(OnEnter(AppState::InGame)))
+        app.add_state::<PlayerState>()
+            .add_system(spawn_player.in_schedule(OnEnter(AppState::InGame)))
             .add_system(move_player.in_set(OnUpdate(AppState::InGame)))
-            .add_system(animate_player.in_set(OnUpdate(AppState::InGame)));
+            .add_system(animate_player_idle.in_set(OnUpdate(PlayerState::Idle)))
+            .add_system(animate_player_walking.in_set(OnUpdate(PlayerState::Walking)));
     }
 }
 
@@ -58,12 +68,20 @@ fn move_player(
     outputs: Query<&KinematicCharacterControllerOutput>,
     mut player_query: Query<&mut TextureAtlasSprite, With<Player>>,
     keyboard_input: Res<Input<KeyCode>>,
+    mut next_player_state: ResMut<NextState<PlayerState>>,
 ) {
     let (mut velocity, mut player_controller) = controllers.single_mut();
     let mut movement = Vec2::new(0.0, 0.0);
     let mut player = player_query.single_mut();
 
     let ground_touched = outputs.iter().map(|p| p.grounded).any(|t| t);
+    if keyboard_input.just_pressed(KeyCode::A) || keyboard_input.just_pressed(KeyCode::D) {
+        next_player_state.set(PlayerState::Walking);
+    } else if (keyboard_input.just_released(KeyCode::A) && !keyboard_input.pressed(KeyCode::D))
+        || (!keyboard_input.pressed(KeyCode::A) && keyboard_input.just_released(KeyCode::D))
+    {
+        next_player_state.set(PlayerState::Idle);
+    }
     if keyboard_input.pressed(KeyCode::A) {
         movement += Vec2::new(-1.0, 0.0);
         player.flip_x = true;

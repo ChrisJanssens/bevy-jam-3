@@ -6,7 +6,9 @@ pub struct PlayerAnimation {
     pub timer: Timer,
 }
 
-pub fn animate_player(
+pub fn animate_player_idle() {}
+
+pub fn animate_player_walking(
     mut player_anim: Query<(&mut TextureAtlasSprite, &mut PlayerAnimation), With<Player>>,
     time: Res<Time>,
 ) {
