@@ -12,6 +12,7 @@ pub enum PlayerState {
     Idle,
     Walking,
     Jumping,
+    JumpingInAir,
 }
 
 impl Plugin for PlayerPlugin {
@@ -20,7 +21,8 @@ impl Plugin for PlayerPlugin {
             .add_system(spawn_player.in_schedule(OnEnter(AppState::InGame)))
             .add_system(move_player.in_set(OnUpdate(AppState::InGame)))
             .add_system(animate_player_idle.in_set(OnUpdate(PlayerState::Idle)))
-            .add_system(animate_player_walking.in_set(OnUpdate(PlayerState::Walking)));
+            .add_system(animate_player_walking.in_set(OnUpdate(PlayerState::Walking)))
+            .add_system(animate_player_jumping.in_set(OnUpdate(PlayerState::Jumping)));
     }
 }
 
@@ -31,7 +33,7 @@ fn spawn_player(
 ) {
     let texture_handle = asset_server.load("gary_walking_spritesheet.png");
     let texture_atlas =
-        TextureAtlas::from_grid(texture_handle, Vec2::new(27.0, 45.0), 4, 1, None, None);
+        TextureAtlas::from_grid(texture_handle, Vec2::new(27.0, 45.0), 4, 2, None, None);
     let texture_atlas_handle = texture_atlases.add(texture_atlas);
 
     cmd.spawn((
@@ -57,22 +59,28 @@ fn spawn_player(
         Player,
         LockedAxes::ROTATION_LOCKED,
         PlayerAnimation {
-            length: 4,
+            walk_range: (0, 3),
+            jump_range: (4, 7),
             timer: Timer::new(Duration::from_millis(200), TimerMode::Repeating),
         },
     ));
 }
 
 fn move_player(
-    mut controllers: Query<(&mut Velocity, &mut KinematicCharacterController), With<Player>>,
+    mut controllers: Query<
+        (
+            &mut KinematicCharacterController,
+            &mut TextureAtlasSprite,
+            &PlayerAnimation,
+        ),
+        With<Player>,
+    >,
     outputs: Query<&KinematicCharacterControllerOutput>,
-    mut player_query: Query<&mut TextureAtlasSprite, With<Player>>,
     keyboard_input: Res<Input<KeyCode>>,
     mut next_player_state: ResMut<NextState<PlayerState>>,
 ) {
-    let (mut velocity, mut player_controller) = controllers.single_mut();
+    let (mut player_controller, mut player, play_anim) = controllers.single_mut();
     let mut movement = Vec2::new(0.0, 0.0);
-    let mut player = player_query.single_mut();
 
     let ground_touched = outputs.iter().map(|p| p.grounded).any(|t| t);
     if keyboard_input.just_pressed(KeyCode::A) || keyboard_input.just_pressed(KeyCode::D) {
@@ -91,7 +99,8 @@ fn move_player(
         player.flip_x = false;
     }
     if keyboard_input.just_pressed(KeyCode::W) && ground_touched {
-        velocity.linvel = Vec2::new(0.0, 400.0);
+        player.index = play_anim.jump_range.0;
+        next_player_state.set(PlayerState::Jumping);
     }
     player_controller.translation = Some(movement);
 }
