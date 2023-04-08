@@ -1,3 +1,5 @@
+use std::collections::VecDeque;
+
 use crate::prelude::*;
 
 #[derive(Component)]
@@ -6,19 +8,33 @@ pub struct PlayerAnimation {
     pub walk_range: (usize, usize),
     pub jump_range: (usize, usize),
     pub timer: Timer,
+    pub blink_timer: Option<Timer>,
+    pub blink_sequence: VecDeque<u64>,
 }
 
 pub fn animate_player_idle(
     mut player_anim: Query<(&mut TextureAtlasSprite, &mut PlayerAnimation), With<Player>>,
     time: Res<Time>,
 ) {
-    for (mut atlas, mut anim) in player_anim.iter_mut() {
-        if anim.timer.tick(time.delta()).finished() {
-            let mut i = atlas.index + 1;
-            if i > anim.idle_range.1 {
-                i = anim.idle_range.0;
+    let (mut atlas, mut anim) = player_anim.single_mut();
+    match &mut anim.blink_timer {
+        Some(timer) => {
+            // eyes closed
+            if timer.tick(time.delta()).finished() {
+                atlas.index = anim.idle_range.1;
+                anim.blink_timer = None;
             }
-            atlas.index = i;
+        }
+        None => {
+            // eyes open
+            if anim.timer.tick(time.delta()).finished() {
+                if let Some(cur_time) = anim.blink_sequence.pop_front() {
+                    atlas.index = anim.idle_range.0;
+                    anim.blink_timer =
+                        Some(Timer::new(Duration::from_millis(cur_time), TimerMode::Once));
+                    anim.blink_sequence.push_back(cur_time);
+                }
+            }
         }
     }
 }

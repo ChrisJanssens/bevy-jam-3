@@ -1,3 +1,5 @@
+use std::collections::VecDeque;
+
 use super::animate::*;
 use crate::prelude::*;
 
@@ -64,6 +66,8 @@ fn spawn_player(
             walk_range: (0, 3),
             jump_range: (4, 7),
             timer: Timer::new(Duration::from_millis(200), TimerMode::Repeating),
+            blink_timer: None,
+            blink_sequence: VecDeque::from([4000, 800]),
         },
     ));
 }
