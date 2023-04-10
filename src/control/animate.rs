@@ -55,20 +55,22 @@ pub fn animate_player_walking(
 }
 
 pub fn animate_player_jumping(
-    mut player_anim: Query<
-        (&mut TextureAtlasSprite, &mut PlayerAnimation, &mut Velocity),
-        With<Player>,
-    >,
+    mut player_anim: Query<(
+        &mut TextureAtlasSprite,
+        &mut PlayerAnimation,
+        &mut Velocity,
+        &Player,
+    )>,
     time: Res<Time>,
     mut next_player_state: ResMut<NextState<PlayerState>>,
 ) {
-    for (mut atlas, mut anim, mut vel) in player_anim.iter_mut() {
+    for (mut atlas, mut anim, mut vel, player) in player_anim.iter_mut() {
         if anim.timer.tick(time.delta()).finished() {
             let i = atlas.index + 1;
             if i == anim.jump_range.1 {
                 next_player_state.set(PlayerState::JumpingInAir);
             } else if i == anim.jump_range.1 - 1 {
-                vel.linvel = Vec2::new(0.0, 400.0);
+                vel.linvel = Vec2::new(0.0, player.jump_strength);
             }
             atlas.index = i;
         }

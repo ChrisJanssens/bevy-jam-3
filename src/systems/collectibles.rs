@@ -4,15 +4,17 @@ use crate::prelude::*;
 
 pub struct CollectiblesPlugin;
 
-#[derive(Eq, PartialEq)]
-enum Potions {
+#[derive(Debug, Eq, PartialEq, Clone, Copy)]
+pub enum Potions {
     Red,
     Green,
     Blue,
 }
 
 #[derive(Component)]
-struct Collectible;
+struct Collectible {
+    collectible_type: Potions,
+}
 
 impl Plugin for CollectiblesPlugin {
     fn build(&self, app: &mut App) {
@@ -56,7 +58,9 @@ fn add_collectibles(mut cmd: Commands, tracker: Res<AssetTracker<Potions, Image>
             Collider::capsule_y(10.0, 8.0),
             Sensor,
             ActiveEvents::COLLISION_EVENTS,
-            Collectible,
+            Collectible {
+                collectible_type: Potions::Blue,
+            },
         ));
     }
     if let Some(green_handle) = tracker.get_handle(Potions::Green) {
@@ -69,7 +73,9 @@ fn add_collectibles(mut cmd: Commands, tracker: Res<AssetTracker<Potions, Image>
             Collider::capsule_y(10.0, 8.0),
             Sensor,
             ActiveEvents::COLLISION_EVENTS,
-            Collectible,
+            Collectible {
+                collectible_type: Potions::Green,
+            },
         ));
     }
     if let Some(red_handle) = tracker.get_handle(Potions::Red) {
@@ -82,22 +88,30 @@ fn add_collectibles(mut cmd: Commands, tracker: Res<AssetTracker<Potions, Image>
             Collider::capsule_y(10.0, 8.0),
             Sensor,
             ActiveEvents::COLLISION_EVENTS,
-            Collectible,
+            Collectible {
+                collectible_type: Potions::Red,
+            },
         ));
     }
 }
 
 fn pickup_collectibles(
     mut cmd: Commands,
-    collectibles: Query<Entity, With<Collectible>>,
+    collectibles: Query<(Entity, &Collectible)>,
+    mut transform_events: EventWriter<TransformPlayer>,
     mut collision_events: EventReader<CollisionEvent>,
 ) {
     for collision_event in collision_events.iter() {
-        for collect in collectibles.iter() {
+        for (collect_ent, collectible) in collectibles.iter() {
             match collision_event {
                 CollisionEvent::Started(en1, en2, t) => {
-                    if (en1 == &collect || en2 == &collect) && t == &CollisionEventFlags::SENSOR {
-                        cmd.entity(collect).despawn();
+                    if (en1 == &collect_ent || en2 == &collect_ent)
+                        && t == &CollisionEventFlags::SENSOR
+                    {
+                        transform_events.send(TransformPlayer {
+                            catalyst: collectible.collectible_type,
+                        });
+                        cmd.entity(collect_ent).despawn();
                     }
                 }
                 CollisionEvent::Stopped(_, _, _) => (),
