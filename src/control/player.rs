@@ -107,6 +107,28 @@ fn spawn_player(mut cmd: Commands, tracker: Res<AssetTracker<PlayerSprite, Textu
     }
 }
 
+fn left_pressed(input: &Res<Input<KeyCode>>) -> bool {
+    input.pressed(KeyCode::A) || input.pressed(KeyCode::Left)
+}
+
+fn right_pressed(input: &Res<Input<KeyCode>>) -> bool {
+    input.pressed(KeyCode::D) || input.pressed(KeyCode::Right)
+}
+
+fn left_just_pressed(input: &Res<Input<KeyCode>>) -> bool {
+    input.just_pressed(KeyCode::A) || input.just_pressed(KeyCode::Left)
+}
+
+fn right_just_pressed(input: &Res<Input<KeyCode>>) -> bool {
+    input.just_pressed(KeyCode::D) || input.just_pressed(KeyCode::Right)
+}
+
+fn jumped_just_pressed(input: &Res<Input<KeyCode>>) -> bool {
+    input.just_pressed(KeyCode::W)
+        || input.just_pressed(KeyCode::Space)
+        || input.just_pressed(KeyCode::Up)
+}
+
 fn move_player(
     mut controllers: Query<(
         &mut KinematicCharacterController,
@@ -124,26 +146,26 @@ fn move_player(
 
     let ground_touched = outputs.iter().map(|p| p.grounded).any(|t| t);
 
-    if keyboard_input.pressed(KeyCode::A) {
+    if left_pressed(&keyboard_input) {
         movement += Vec2::new(-1.0 * player.movement_scalar, 0.0);
         player_sprite.flip_x = true;
     }
-    if keyboard_input.pressed(KeyCode::D) {
+    if right_pressed(&keyboard_input) {
         movement += Vec2::new(1.0 * player.movement_scalar, 0.0);
         player_sprite.flip_x = false;
     }
 
     if ground_touched {
-        if keyboard_input.just_pressed(KeyCode::A) || keyboard_input.just_pressed(KeyCode::D) {
+        if left_just_pressed(&keyboard_input) || right_just_pressed(&keyboard_input) {
             player_sprite.index = play_anim.walk_range.0;
             next_player_state.set(PlayerState::Walking);
-        } else if (keyboard_input.just_released(KeyCode::A) && !keyboard_input.pressed(KeyCode::D))
-            || (!keyboard_input.pressed(KeyCode::A) && keyboard_input.just_released(KeyCode::D))
+        } else if (left_just_pressed(&keyboard_input) && !right_just_pressed(&keyboard_input))
+            || (!left_just_pressed(&keyboard_input) && right_just_pressed(&keyboard_input))
         {
             player_sprite.index = play_anim.idle_range.0;
             next_player_state.set(PlayerState::Idle);
         } else if cur_state.0 == PlayerState::JumpingInAir {
-            if keyboard_input.pressed(KeyCode::A) || keyboard_input.pressed(KeyCode::D) {
+            if left_just_pressed(&keyboard_input) || right_just_pressed(&keyboard_input) {
                 player_sprite.index = play_anim.walk_range.0;
                 next_player_state.set(PlayerState::Walking); // hit the ground walking
             } else {
@@ -151,7 +173,7 @@ fn move_player(
                 next_player_state.set(PlayerState::Idle);
             }
         }
-        if keyboard_input.just_pressed(KeyCode::W) {
+        if jumped_just_pressed(&keyboard_input) {
             player_sprite.index = play_anim.jump_range.0;
             next_player_state.set(PlayerState::Jumping);
         }

@@ -32,10 +32,11 @@ fn main() {
         .add_state::<AppState>()
         .add_plugins(DefaultPlugins)
         .add_plugin(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(40.0))
-        .add_plugin(RapierDebugRenderPlugin::default())
+        //.add_plugin(RapierDebugRenderPlugin::default())
         .add_plugin(PlatformsPlugin)
         .add_plugin(PlayerPlugin)
         .add_plugin(CollectiblesPlugin)
+        .insert_resource(ClearColor(Color::rgb(0.8, 0.8, 0.8)))
         .add_system(setup.on_startup())
         .run();
 }
